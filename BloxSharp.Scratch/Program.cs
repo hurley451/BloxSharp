@@ -2,6 +2,8 @@
 using BloxSharp.Compiler;
 using BloxSharp.Compiler.Engine;
 using BloxSharp.Compiler.Interface;
+using BloxSharp.Compiler.Utils;
+using Samples;
 
 namespace BloxSharp.Scratch
 {
@@ -12,11 +14,12 @@ namespace BloxSharp.Scratch
             Console.WriteLine("Hello, World!");
 
             ICodeEmitter emitter = new LuauCodeEmitter();
-            IIRBuilder builder = new ReflectionIRBuilder(new LuauStatementTranslator(new LuauExpressionTranslator()));
+            ISourceLocator sourceLocator = new DefaultSourceLocator(DefaultSourceLocator.GetProjectRoot());
+            IIRBuilder builder = new ReflectionIRBuilder(new LuauStatementTranslator(new LuauExpressionTranslator()),sourceLocator);
 
             using (var compiler = new CompilationEngine(builder, emitter))
             {
-
+                compiler.Compile(typeof(Person),"person.luau");
             }
         }
     }

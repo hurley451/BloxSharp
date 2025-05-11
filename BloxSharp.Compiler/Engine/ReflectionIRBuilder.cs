@@ -10,10 +10,12 @@ namespace BloxSharp.Compiler.Engine;
 public class ReflectionIRBuilder : IIRBuilder
 {
     private readonly IStatementTranslator _statementTranslator;
+    private readonly ISourceLocator _sourceLocator;
 
-    public ReflectionIRBuilder(IStatementTranslator statementTranslator)
+    public ReflectionIRBuilder(IStatementTranslator statementTranslator, ISourceLocator sourceLocator)
     {
         _statementTranslator = statementTranslator;
+        _sourceLocator = sourceLocator;
     }
 
     public IRClass? Build(Type type)
@@ -44,10 +46,10 @@ public class ReflectionIRBuilder : IIRBuilder
 
     private string? TranslateMethodBody(Type type, MethodInfo method)
     {
-        var fileName = type.Name + ".cs";
-        if (!File.Exists(fileName)) return "-- TODO: Missing source file";
+        var filePath = _sourceLocator.Locate(type);
+        if (filePath == null || !File.Exists(filePath)) return "-- TODO: Missing source file";
 
-        var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(fileName));
+        var tree = CSharpSyntaxTree.ParseText(File.ReadAllText(filePath));
         var root = tree.GetRoot();
 
         var methodSyntax = root.DescendantNodes().OfType<MethodDeclarationSyntax>()
